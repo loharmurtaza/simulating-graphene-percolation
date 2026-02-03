@@ -1,0 +1,17 @@
+# Ignore __pycache__
+__pycache__/
+
+# Ignore .pytest_cache
+.pytest_cache/
+
+# Ignore .vscode
+.vscode/
+
+# Ignore venv
+venv/
+
+# Ignore data/output
+data/output/*
+
+# Ignore logs
+logs/*
