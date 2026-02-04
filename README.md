@@ -17,7 +17,13 @@ The simulation:
 ```bash
 # Clone the repository
 git clone https://github.com/loharmurtaza/simulating-graphene-percolation.git
-cd graphene-percolation
+cd simulating-graphene-percolation
+
+# Create a virtual environment
+python -m venv venv
+
+# Move inside venv
+.\venv\Scripts\Activate.ps1
 
 # Install dependencies
 pip install -r requirements.txt
@@ -51,6 +57,16 @@ This will:
 4. Test for percolation connectivity (top-to-bottom and left-to-right)
 5. Generate visualizations (if enabled)
 
+### N-Simulations (Monte Carlo)
+
+Run a configurable number of independent simulations with early-stopping at first percolation:
+
+```bash
+python main_graphene_percolation.py --task n_simulations
+```
+
+Each run uses a different random seed. The pipeline stops each simulation at the first time-step where percolation occurs and records per-run results (percolation time, coverage, top-to-bottom/left-to-right). Set `SIMULATIONS_TO_RUN` in `.env` to control how many runs to execute.
+
 ### Results Analysis
 
 Analyze percolation results and generate statistical plots:
@@ -75,6 +91,7 @@ Configuration is managed through the `.env` file:
 | `RANDOM_SEED`             | 10        | Random seed for reproducibility   |
 | `MESH_POINTS`             | 1000      | Grid resolution (N x N points)    |
 | `SHOW_PLOTS`              | True      | Display plots during execution    |
+| `SIMULATIONS_TO_RUN`      | 1000      | Number of runs for simulations    |
 
 ### Directory Structure
 
@@ -85,8 +102,12 @@ graphene-percolation/
 ├── .env                           # Configuration
 ├── config/
 │   └── settings.py                # Configuration dataclasses
+├── models/
+│   ├── growth_result.py           # Single-run growth/percolation result
+│   └── simulation_result.py       # Per-simulation result (n_simulations)
 ├── scripts/
 │   ├── run_surface.py             # Surface simulation pipeline
+│   ├── run_simulations.py         # N-simulations pipeline (early-stopping)
 │   └── run_results.py             # Results analysis
 ├── utils/
 │   ├── config_logger.py           # Logging configuration
@@ -99,7 +120,6 @@ graphene-percolation/
 └── data/
     ├── raw/
     │   └── experimental_raw.csv   # Experimental data
-    ├── processed/                 # Processed data
     └── output/                    # Output files
 ```
 
@@ -138,7 +158,7 @@ Where:
 
 ## Output
 
-- **Percolation data**: `data/output/all_percolations.csv`
+- **Percolation data**: `data/output/growth_results_simulations.csv`
 - **Statistical analysis figure**: `data/output/gaussian_curves.png`
 - **Simulation visualizations**: Displayed during runtime (if `SHOW_PLOTS=True`)
 
