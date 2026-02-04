@@ -96,7 +96,7 @@ Configuration is managed through the `.env` file:
 ### Directory Structure
 
 ```
-graphene-percolation/
+simulating-graphene-percolation/
 ├── main_graphene_percolation.py   # CLI entry point
 ├── requirements.txt               # Python dependencies
 ├── .env                           # Configuration
