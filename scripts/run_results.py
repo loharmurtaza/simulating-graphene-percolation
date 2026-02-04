@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import logging
 import numpy as np
 import pandas as pd
 from pathlib import Path
 from scipy.stats import norm
 import matplotlib.pyplot as plt
 from config.settings import FinalResultsConfig
+
+logger = logging.getLogger(__name__)
 
 
 # -------------------------------------------------

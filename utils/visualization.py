@@ -5,10 +5,8 @@ from __future__ import annotations
 import logging
 from typing import List, Dict, Tuple
 import matplotlib.patches as patches
-from utils.config_logger import setup_logging
 from utils.math import circle_touches_line, two_circles_touching
 
-setup_logging()
 logger = logging.getLogger(__name__)
 
 
@@ -28,9 +26,6 @@ def generate_graph(
     """
     Generate a graph of the circles on the surface.
     """
-    logger.info(
-        f"Generating graph: circles={circles}, surface_dim={surface_dim}",
-    )
     graph: Dict[int, List[int]] = {}
     top: Dict[int, bool] = {}
     bottom: Dict[int, bool] = {}
@@ -40,16 +35,12 @@ def generate_graph(
     for i, circle in enumerate(circles):
         if circle_touches_line(circle, surface_dim, 'top'):
             top[i] = True
-            logger.info(f"Circle {i} touches top line")
         if circle_touches_line(circle, surface_dim, 'bottom'):
             bottom[i] = True
-            logger.info(f"Circle {i} touches bottom line")
         if circle_touches_line(circle, surface_dim, 'left'):
             left[i] = True
-            logger.info(f"Circle {i} touches left line")
         if circle_touches_line(circle, surface_dim, 'right'):
             right[i] = True
-            logger.info(f"Circle {i} touches right line")
 
         neighbors: List[int] = []
         for j, other in enumerate(circles):
@@ -57,8 +48,11 @@ def generate_graph(
                 continue
             if two_circles_touching(circle, other):
                 neighbors.append(j)
-                logger.info(f"Circle {i} touches circle {j}")
         graph[i] = neighbors
 
-    logger.info(f"Graph generated: {graph}")
+    logger.info("Graph generated with the following boundaries:")
+    logger.info(f"- Top: {len(top)} circles touching the top boundary.")
+    logger.info(f"- Bottom: {len(bottom)} circles touching the bottom boundary.")
+    logger.info(f"- Left: {len(left)} circles touching the left boundary.")
+    logger.info(f"- Right: {len(right)} circles touching the right boundary.")
     return graph, top, bottom, left, right
