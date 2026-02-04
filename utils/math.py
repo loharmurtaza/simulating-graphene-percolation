@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import logging
 import numpy as np
-from tqdm import tqdm
 from utils.seeding import set_seed
 import matplotlib.patches as patches
 from scipy.optimize import curve_fit
@@ -121,7 +120,7 @@ def two_points_distance(
 def random_points(
     num_circles: int,
     surface_dim: float,
-    random_seed: int = 10,
+    random_seed: int | None = None,  # intentionally stochastic
 ) -> List[List[int]]:
     """
     Randomly distribute circle centers with distance constraints.
@@ -130,10 +129,11 @@ def random_points(
         f"Generating random points: num_circles={num_circles}, "
         f"surface_dim={surface_dim}, random_seed={random_seed}",
     )
-    set_seed(random_seed)
+    if random_seed is not None:
+        set_seed(random_seed)
 
     points: List[List[int]] = []
-    for _ in tqdm(range(num_circles), desc="Generating center points"):
+    for _ in range(num_circles):
         while True:
             x = int(np.random.randint(0, surface_dim))
             y = int(np.random.randint(0, surface_dim))

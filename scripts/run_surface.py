@@ -132,12 +132,12 @@ def simulate_growth(
 
             save_fig_as_png(
                 plt.gcf(),
-                OUTPUT_DIR / 'images' / f'time_index_{time:.2f}min.png',
+                OUTPUT_DIR / 'images' / f'time_index_{time:.1f}min.png',
                 dpi=300,
             )
             save_fig_as_pdf(
                 plt.gcf(),
-                OUTPUT_DIR / 'pdfs' / f'time_index_{time:.2f}min.pdf',
+                OUTPUT_DIR / 'pdfs' / f'time_index_{time:.1f}min.pdf',
                 dpi=300,
             )
             plt.close()

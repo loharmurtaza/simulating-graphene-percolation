@@ -49,10 +49,4 @@ def generate_graph(
             if two_circles_touching(circle, other):
                 neighbors.append(j)
         graph[i] = neighbors
-
-    logger.info("Graph generated with the following boundaries:")
-    logger.info(f"- Top: {len(top)} circles touching the top boundary.")
-    logger.info(f"- Bottom: {len(bottom)} circles touching the bottom boundary.")
-    logger.info(f"- Left: {len(left)} circles touching the left boundary.")
-    logger.info(f"- Right: {len(right)} circles touching the right boundary.")
     return graph, top, bottom, left, right
