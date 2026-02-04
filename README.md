@@ -16,7 +16,7 @@ The simulation:
 
 ```bash
 # Clone the repository
-git clone https://github.com/loharmurtaza/graphene-percolation.git
+git clone https://github.com/loharmurtaza/simulating-graphene-percolation.git
 cd graphene-percolation
 
 # Install dependencies
@@ -25,14 +25,14 @@ pip install -r requirements.txt
 
 ### Dependencies
 
-| Package | Version | Purpose |
-|---------|---------|---------|
-| numpy | 1.26.4 | Numerical computations |
-| pandas | 2.2.1 | Data manipulation |
-| matplotlib | 3.8.3 | Visualization |
-| scipy | 1.12.0 | Curve fitting |
-| tqdm | 4.66.2 | Progress bars |
-| shapely | 2.0.3 | Geometric calculations |
+| Package       | Version   | Purpose                   |
+|---------------|-----------|---------------------------|
+| numpy         | 1.26.4    | Numerical computations    |
+| pandas        | 2.2.1     | Data manipulation         |
+| matplotlib    | 3.8.3     | Visualization             |
+| scipy         | 1.12.0    | Curve fitting             |
+| tqdm          | 4.66.2    | Progress bars             |
+| shapely       | 2.0.3     | Geometric calculations    |
 
 ## Usage
 
@@ -67,14 +67,14 @@ Configuration is managed through the `.env` file:
 
 ### Simulation Parameters
 
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `GRID_SIZE_MICRONS` | 100 | Surface grid size in micrometers |
-| `NUM_CIRCLES` | 48 | Number of graphene flakes |
-| `INITIAL_RADIUS_MICRONS` | 0.1 | Initial radius of each circle |
-| `RANDOM_SEED` | 10 | Random seed for reproducibility |
-| `MESH_POINTS` | 1000 | Grid resolution (N x N points) |
-| `SHOW_PLOTS` | True | Display plots during execution |
+| Parameter                 | Default   | Description                       |
+|---------------------------|-----------|-----------------------------------|
+| `GRID_SIZE_MICRONS`       | 100       | Surface grid size in micrometers  |
+| `NUM_CIRCLES`             | 48        | Number of graphene flakes         |
+| `INITIAL_RADIUS_MICRONS`  | 0.1       | Initial radius of each circle     |
+| `RANDOM_SEED`             | 10        | Random seed for reproducibility   |
+| `MESH_POINTS`             | 1000      | Grid resolution (N x N points)    |
+| `SHOW_PLOTS`              | True      | Display plots during execution    |
 
 ### Directory Structure
 

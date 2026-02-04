@@ -7,37 +7,25 @@ import numpy as np
 from typing import List
 from pathlib import Path
 import matplotlib.pyplot as plt
-from dataclasses import dataclass
 import matplotlib.patches as patches
 from config.settings import OUTPUT_DIR
-from utils.config_logger import setup_logging
+from models.growth_result import GrowthResult
 from utils.visualization import generate_graph
 from utils.io import load_experimental_raw_data
 from config.settings import SurfaceCoverageConfig
 from utils.search_algorithm import breadth_first_search
 from utils.math import random_points, build_initial_circles
-from utils.save_files import save_fig_as_png, save_fig_as_pdf
+from utils.save_files import (
+    save_fig_as_png, save_fig_as_pdf, save_growth_results_summary,
+)
 from utils.math import (
     fit_surface_coverage_logistic, logistic, logistic_derivative,
+    estimate_mean_areas_from_coverage,
 )
 
-setup_logging()
 logger = logging.getLogger(__name__)
 
 OUTPUT_DIR = Path(OUTPUT_DIR)
-
-
-# -------------------------------------------------
-# Growth Result
-# -------------------------------------------------
-@dataclass
-class GrowthResult:
-    time_min: float
-    target_coverage_pct: float
-    achieved_coverage_pct: float
-    top_to_bottom: bool
-    left_to_right: bool
-    coverage_mask: np.ndarray
 
 
 # -------------------------------------------------
@@ -53,10 +41,6 @@ def simulate_growth(
     """
     Simulate radial growth to match target coverage, then test percolation.
     """
-    logger.info(
-        f"Simulating growth: circles={circles}, t_fit={t_fit},"
-        f"S_fit={S_fit}, cfg={cfg}, show_plots={show_plots}",
-    )
     grid_size = cfg.grid_size_microns
     x = np.linspace(0, grid_size, cfg.mesh_points)
     y = np.linspace(0, grid_size, cfg.mesh_points)
@@ -66,13 +50,14 @@ def simulate_growth(
     grid_mask = (xv >= 0) & (xv <= grid_size) & (yv >= 0) & (yv <= grid_size)
 
     for t_index, time in enumerate(t_fit):
-        logger.info(f"Simulating growth: t_index={t_index}, time={time}")
+        logger.info(
+            f"Simulating growth: t_index={t_index}, "
+            f"time={np.round(time, 2)} minutes",
+        )
         num = len(circles)
 
         target_area = S_fit[t_index] / num * 100
-        logger.info(f"Target area: {target_area}")
         target_radius = np.sqrt(target_area / np.pi)
-        logger.info(f"Target radius: {target_radius}")
 
         grown = []
         surface_coverage = np.zeros_like(xv, dtype=bool)
@@ -87,14 +72,10 @@ def simulate_growth(
 
         surface_coverage &= grid_mask
         frac = float(np.sum(surface_coverage) / np.sum(grid_mask))
-        logger.info(f"Surface coverage: {frac}")
 
         final_grown = grown
         final_cov = surface_coverage
         final_frac = frac
-        logger.info(f"Final grown: {final_grown}")
-        logger.info(f"Final coverage: {final_cov}")
-        logger.info(f"Final fraction: {final_frac}")
 
         tolerance = 1.0
         while (S_fit[t_index] - final_frac * 100) > tolerance:
@@ -102,8 +83,6 @@ def simulate_growth(
             delta_area = delta_pct / num * 100
             final_target_area = target_area + delta_area
             final_target_radius = np.sqrt(final_target_area / np.pi)
-            logger.info(f"Final target area: {final_target_area}")
-            logger.info(f"Final target radius: {final_target_radius}")
 
             final_grown = []
             final_cov = np.zeros_like(xv, dtype=bool)
@@ -122,25 +101,15 @@ def simulate_growth(
             final_frac = float(np.sum(final_cov) / np.sum(grid_mask))
             target_area = final_target_area
 
-        logger.info(
-            f"Generating graph: final_grown={final_grown},"
-            f"grid_size={grid_size}",
-        )
         graph, top, bottom, left, right = generate_graph(
             final_grown, grid_size,
         )
-
-        logger.info(f"Graph generated: graph={graph}")
-        logger.info(f"Top: {top}")
-        logger.info(f"Bottom: {bottom}")
-        logger.info(f"Left: {left}")
-        logger.info(f"Right: {right}")
 
         top_to_bottom = False
         for start in top.keys():
             _, ok = breadth_first_search(graph, start, bottom.keys())
             if ok:
-                logger.info(f"Top to bottom found: {start}")
+                logger.info("Top to bottom percolation found")
                 top_to_bottom = True
                 break
 
@@ -148,7 +117,7 @@ def simulate_growth(
         for start in left.keys():
             _, ok = breadth_first_search(graph, start, right.keys())
             if ok:
-                logger.info(f"Left to right found: {start}")
+                logger.info("Left to right percolation found")
                 left_to_right = True
                 break
 
@@ -160,25 +129,49 @@ def simulate_growth(
             ax[1].imshow(final_cov, extent=(0, grid_size, 0, grid_size))
             ax[1].set_xlabel("Length (μm)")
             ax[1].set_ylabel("Length (μm)")
-            plt.show()
-            logger.info("Plots shown")
+
+            save_fig_as_png(
+                plt.gcf(),
+                OUTPUT_DIR / 'images' / f'time_index_{time:.2f}min.png',
+                dpi=300,
+            )
+            save_fig_as_pdf(
+                plt.gcf(),
+                OUTPUT_DIR / 'pdfs' / f'time_index_{time:.2f}min.pdf',
+                dpi=300,
+            )
+            plt.close()
 
         results.append(
             GrowthResult(
                 time_min=float(time),
                 target_coverage_pct=float(S_fit[t_index]),
-                achieved_coverage_pct=float(final_frac * 100),
+                initial_simulated_coverage_pct=float(frac * 100),
+                final_simulated_coverage_pct=float(final_frac * 100),
                 top_to_bottom=top_to_bottom,
                 left_to_right=left_to_right,
-                coverage_mask=final_cov,
             )
         )
-        logger.info(f"Results appended: {results}")
+
+        logger.info(
+            f"Percentage area according to logistic function: "
+            f"{S_fit[t_index]:.3f}%"
+        )
+        logger.info(
+            f"Percentage area according to simulation: "
+            f"{frac * 100:.3f}%"
+        )
+        logger.info(
+            f"Final percentage area according to simulation: "
+            f"{final_frac * 100:.3f}%"
+        )
+
+        logger.info("Results appended")
 
         circles = final_grown
-        logger.info(f"Circles updated: {circles}")
+        logger.info("Circles updated\n\n")
 
-    logger.info(f"Simulated growth completed: {results}")
+    logger.info("Simulated growth completed")
     return results
 
 
@@ -246,22 +239,45 @@ def run_pipeline(
 
         save_fig_as_png(
             plt.gcf(),
-            OUTPUT_DIR / 'surface_coverage_vs_synthesis_time.png',
+            OUTPUT_DIR / 'images' / 'surface_coverage_vs_time.png',
             dpi=300,
         )
         save_fig_as_pdf(
             plt.gcf(),
-            OUTPUT_DIR / 'surface_coverage_vs_synthesis_time.pdf',
+            OUTPUT_DIR / 'pdfs' / 'surface_coverage_vs_time.pdf',
             dpi=300,
         )
-        plt.show()
+        plt.close()
+
+    # Mean area of flakes for the first two samples
+    mean_area = np.array([6.8, 106.58])
+    coverage_data = np.array([3.2, 51.2])
+
+    estimated_mean_areas = estimate_mean_areas_from_coverage(
+        coverage_data, mean_area, S_data,
+    )
+
+    # Display the estimated mean areas
+    for t, s, area in zip(t_data, S_data, estimated_mean_areas):
+        logger.info(
+            f"At time {t:.1f} minutes, "
+            f"surface coverage is {s:.1f}% and "
+            f"the estimated mean area is {area:.2f} square microns."
+        )
 
     points = random_points(
         cfg.num_circles, cfg.grid_size_microns, random_seed=cfg.random_seed,
     )
     circles = build_initial_circles(points, radius=cfg.initial_radius_microns)
 
-    simulate_growth(circles, t_fit, S_fit, cfg, show_plots=cfg.show_plots)
+    results = simulate_growth(
+        circles, t_fit, S_fit, cfg, show_plots=cfg.show_plots,
+    )
+
+    save_growth_results_summary(
+        results,
+        OUTPUT_DIR / 'csvs' / 'growth_results_single_percolation.csv',
+    )
 
 
 # -------------------------------------------------

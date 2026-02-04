@@ -5,9 +5,7 @@ from __future__ import annotations
 import logging
 import random
 import numpy as np
-from utils.config_logger import setup_logging
 
-setup_logging()
 logger = logging.getLogger(__name__)
 
 

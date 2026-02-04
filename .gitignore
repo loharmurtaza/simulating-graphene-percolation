@@ -15,3 +15,9 @@ data/output/*
 
 # Ignore logs
 logs/*
+
+# Ignore ZIP files
+*.zip
+
+# Ignore COMMIT_MESSAGE.txt
+COMMIT_MESSAGE.txt

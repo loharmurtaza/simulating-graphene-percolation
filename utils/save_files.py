@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
+import csv
 import logging
+from typing import List
 from pathlib import Path
 import matplotlib.pyplot as plt
-from utils.config_logger import setup_logging
+from models.growth_result import GrowthResult
 
-setup_logging()
 logger = logging.getLogger(__name__)
 
 
@@ -43,3 +44,44 @@ def save_fig_as_pdf(
     path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(path, dpi=dpi, bbox_inches='tight')
     logger.info(f"Figure saved as {path}")
+
+
+# -------------------------------------------------
+# Save Growth Results to CSV
+# -------------------------------------------------
+def save_growth_results_summary(
+    results: List[GrowthResult],
+    output_path: Path,
+) -> None:
+    """
+    Save a summary CSV of growth simulation results.
+    One row per time step.
+    """
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with output_path.open("w", newline="") as f:
+        writer = csv.writer(f)
+
+        # Header
+        writer.writerow([
+            "time_min",
+            "target_coverage_pct",
+            "initial_simulated_coverage_pct",
+            "final_simulated_coverage_pct",
+            "top_to_bottom",
+            "left_to_right",
+            "percolates",
+        ])
+
+        # Rows
+        for r in results:
+            writer.writerow([
+                r.time_min,
+                r.target_coverage_pct,
+                r.initial_simulated_coverage_pct,
+                r.final_simulated_coverage_pct,
+                r.top_to_bottom,
+                r.left_to_right,
+                r.top_to_bottom or r.left_to_right,
+            ])

@@ -9,10 +9,8 @@ from utils.seeding import set_seed
 import matplotlib.patches as patches
 from scipy.optimize import curve_fit
 from typing import Iterable, List, Tuple
-from utils.config_logger import setup_logging
 from shapely.geometry import LineString, Point
 
-setup_logging()
 logger = logging.getLogger(__name__)
 
 
@@ -109,16 +107,11 @@ def two_points_distance(
     """
     Distance between two points: must be between 5 and 140 microns.
     """
-    logger.info(
-        f"Two points distance: point_one={point_one}, point_two={point_two}",
-    )
     p1 = np.array(list(point_one), dtype=float)
     p2 = np.array(list(point_two), dtype=float)
     d = float(np.linalg.norm(p1 - p2))
     if (d > 5.0) and (d < 140.0):
-        logger.info(f"Two points distance: d={d}")
         return d
-    logger.info(f"Two points distance: d={d} is not between 5 and 140 microns")
     return None
 
 
@@ -134,7 +127,7 @@ def random_points(
     Randomly distribute circle centers with distance constraints.
     """
     logger.info(
-        f"Generating random points: num_circles={num_circles},"
+        f"Generating random points: num_circles={num_circles}, "
         f"surface_dim={surface_dim}, random_seed={random_seed}",
     )
     set_seed(random_seed)
@@ -148,12 +141,11 @@ def random_points(
             for px, py in points:
                 if two_points_distance([x, y], [px, py]) is None:
                     invalid = True
-                    logger.info(f"Invalid point: x={x}, y={y}")
                     break
             if not invalid:
                 points.append([x, y])
-                logger.info(f"Valid point: x={x}, y={y}")
                 break
+    logger.info(f"Generated {len(points)} points")
     return points
 
 
@@ -168,7 +160,8 @@ def build_initial_circles(
     Build initial circles from center points.
     """
     logger.info(
-        f"Building initial circles: points={points}, radius={radius}",
+        f"Building initial circles with total points={len(points)} and "
+        f"initial radius={radius}",
     )
     circles: List[patches.Circle] = []
     for x, y in points:
@@ -192,13 +185,9 @@ def circle_touches_line(
     """
     Check if a circle touches a line.
     """
-    logger.info(
-        f"Checking if circle touches line: circle={circle},"
-        f"surface_dim={surface_dim}, which_line={which_line}",
-    )
-    if which_line == 'top':
+    if which_line == 'bottom':
         line = LineString([(0, surface_dim), (surface_dim, surface_dim)])
-    elif which_line == 'bottom':
+    elif which_line == 'top':
         line = LineString([(0, 0), (surface_dim, 0)])
     elif which_line == 'left':
         line = LineString([(0, 0), (0, surface_dim)])
@@ -212,7 +201,6 @@ def circle_touches_line(
 
     circle_point = Point(circle.center)
     distance_to_line = circle_point.distance(line)
-    logger.info(f"Distance to line: {distance_to_line}")
     return distance_to_line <= circle.radius
 
 
@@ -227,13 +215,8 @@ def two_circles_touching(
     """
     Check if a circle touches another circle.
     """
-    logger.info(
-        f"Checking if two circles touching: circle_one={circle_one},"
-        f"circle_two={circle_two}, tolerance={tolerance}",
-    )
     d = np.sqrt(
         (circle_one.center[0] - circle_two.center[0])**2 +
         (circle_one.center[1] - circle_two.center[1])**2,
     )
-    logger.info(f"Distance between circles: {d}")
     return d <= (circle_one.radius + circle_two.radius + tolerance)
