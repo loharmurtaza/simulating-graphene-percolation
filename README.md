@@ -139,7 +139,7 @@ data_point (in min),surface_coverage (in %),standard_deviation (in %)
 
 ### Logistic Growth Model
 
-Surface coverage \(S(t)\) is modeled using the logistic function:
+Surface coverage $S(t)$ is modeled using the logistic function:
 
 $$
 S(t) = \frac{L}{1 + e^{-k(t - t_0)}}
