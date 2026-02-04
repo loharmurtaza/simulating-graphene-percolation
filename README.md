@@ -146,8 +146,8 @@ S(t) = \frac{L}{1 + e^{-k(t - t_0)}}
 $$
 
 Where:
-- **L**: Maximum coverage level (asymptote)
-- **k**: Growth rate parameter
+- **$L$**: Maximum coverage level (asymptote)
+- **$k$**: Growth rate parameter
 - **$t_0$**: Midpoint time (inflection point)
 
 ### Percolation Detection
