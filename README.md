@@ -139,16 +139,16 @@ data_point (in min),surface_coverage (in %),standard_deviation (in %)
 
 ### Logistic Growth Model
 
-Surface coverage S(t) is modeled using the logistic function:
+Surface coverage \(S(t)\) is modeled using the logistic function:
 
-```
-S(t) = L / (1 + exp(-k(t - t0)))
-```
+$$
+S(t) = \frac{L}{1 + e^{-k(t - t_0)}}
+$$
 
 Where:
 - **L**: Maximum coverage level (asymptote)
 - **k**: Growth rate parameter
-- **t0**: Midpoint time (inflection point)
+- **$t_0$**: Midpoint time (inflection point)
 
 ### Percolation Detection
 
