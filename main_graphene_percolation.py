@@ -34,7 +34,7 @@ def cli() -> None:
         "--task",
         choices=["surface", "n_simulations", "results"],
         required=True,
-    )git 
+    )
     args = p.parse_args()
 
     if args.task == "surface":
