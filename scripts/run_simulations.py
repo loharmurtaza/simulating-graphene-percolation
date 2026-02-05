@@ -214,7 +214,7 @@ def run_pipeline(
     Run N simulations and write a single CSV
     """
     out_csv_dir = OUTPUT_DIR / 'csvs'
-    out_csv_dir.parent.mkdir(parents=True, exist_ok=True)
+    out_csv_dir.mkdir(parents=True, exist_ok=True)
 
     # Fit Logistic once (shared)
     t_data, S_data, std_data = load_experimental_raw_data(cfg.raw_data_path)
