@@ -10,6 +10,7 @@ from pathlib import Path
 from dataclasses import asdict
 from typing import List, Optional
 import matplotlib.patches as patches
+from multiprocessing import Pool, cpu_count
 from models.growth_result import GrowthResult
 from utils.visualization import generate_graph
 from utils.io import load_experimental_raw_data
@@ -140,6 +141,69 @@ def simulate_growth_until_percolation(
 
 
 # -------------------------------------------------
+# Run single simulation
+# -------------------------------------------------
+def _run_single_simulation(args: tuple) -> dict:
+    """
+    Worker function for a single simulation.
+    Must be top-level for multi-processing pickling.
+    """
+    (
+        sim_id,
+        seed,
+        cfg,
+        t_fit,
+        S_fit,
+    ) = args
+
+    # Fresh initial nucleation for each run
+    points = random_points(
+        cfg.num_circles,
+        cfg.grid_size_microns,
+        random_seed=seed,
+    )
+
+    circles = build_initial_circles(
+        points,
+        radius=cfg.initial_radius_microns,
+    )
+
+    percolated, gr, steps = simulate_growth_until_percolation(
+        circles,
+        t_fit,
+        S_fit,
+        cfg,
+    )
+
+    if percolated and gr is not None:
+        result = SimulationResult(
+            simulation_id=sim_id,
+            seed_used=seed,
+            percolated=True,
+            percolation_time_min=gr.time_min,
+            percolation_target_coverage_pct=gr.target_coverage_pct,
+            percolation_final_coverage_pct=gr.final_simulated_coverage_pct,
+            top_to_bottom=gr.top_to_bottom,
+            left_to_right=gr.left_to_right,
+            steps_simulated=steps,
+        )
+    else:
+        result = SimulationResult(
+            simulation_id=sim_id,
+            seed_used=seed,
+            percolated=False,
+            percolation_time_min=None,
+            percolation_target_coverage_pct=None,
+            percolation_final_coverage_pct=None,
+            top_to_bottom=False,
+            left_to_right=False,
+            steps_simulated=steps,
+        )
+
+    return asdict(result)
+
+
+# -------------------------------------------------
 # Run N simulations and write a single CSV
 # -------------------------------------------------
 def run_pipeline(
@@ -173,57 +237,34 @@ def run_pipeline(
     n = int(sim_cfg.simulations_to_run)
     logger.info(f"Running {n} simulations (unique seed per simulation)")
 
-    for sim_id in tqdm(range(n), desc="Simulations"):
-        logger.info(
-            f"Simulation {sim_id+1} of {n}"
-        )
-        seed = int(rng.integers(1, 2_147_483_647))
+    # -------------------------------------------------
+    # Multiprocessing execution
+    # -------------------------------------------------
+    num_workers = min(sim_cfg.max_workers, cpu_count())
+    logger.info(f"Using {num_workers} worker processes")
 
-        # Fresh initial nucleation for each run (unique seed)
-        points = random_points(
-            cfg.num_circles,
-            cfg.grid_size_microns,
-            random_seed=seed,
-        )
+    rng = np.random.default_rng()
+    seeds = rng.integers(1, 2_147_483_647, size=n)
 
-        circles = build_initial_circles(
-            points,
-            radius=cfg.initial_radius_microns,
-        )
-
-        percolated, gr, steps = simulate_growth_until_percolation(
-            circles,
+    worker_args = [
+        (
+            sim_id+1,
+            int(seeds[sim_id]),
+            cfg,
             t_fit,
             S_fit,
-            cfg,
         )
+        for sim_id in range(n)
+    ]
 
-        if percolated and gr is not None:
-            rec = SimulationResult(
-                simulation_id=sim_id+1,
-                seed_used=seed,
-                percolated=True,
-                percolation_time_min=gr.time_min,
-                percolation_target_coverage_pct=gr.target_coverage_pct,
-                percolation_final_coverage_pct=gr.final_simulated_coverage_pct,
-                top_to_bottom=gr.top_to_bottom,
-                left_to_right=gr.left_to_right,
-                steps_simulated=steps,
+    with Pool(processes=num_workers) as pool:
+        records = list(
+            tqdm(
+                pool.imap_unordered(_run_single_simulation, worker_args),
+                total=n,
+                desc="Simulations (parallel)",
             )
-        else:
-            rec = SimulationResult(
-                simulation_id=sim_id+1,
-                seed_used=seed,
-                percolated=False,
-                percolation_time_min=None,
-                percolation_target_coverage_pct=None,
-                percolation_final_coverage_pct=None,
-                top_to_bottom=False,
-                left_to_right=False,
-                steps_simulated=steps,
-            )
-
-        records.append(asdict(rec))
+        )
 
     df = pd.DataFrame(records)
     out_path = out_csv_dir / "growth_results_simulations.csv"
