@@ -8,17 +8,19 @@ import pandas as pd
 from pathlib import Path
 from scipy.stats import norm
 import matplotlib.pyplot as plt
-from config.settings import FinalResultsConfig
+from config.settings import FinalResultsConfig, OUTPUT_DIR
+from utils.save_files import save_fig_as_pdf, save_fig_as_png
 
 logger = logging.getLogger(__name__)
+
+OUTPUT_DIR = Path(OUTPUT_DIR)
 
 
 # -------------------------------------------------
 # Plot Gaussian Curves
 # -------------------------------------------------
 def plot_gaussian_curves(
-    all_percolations: pd.DataFrame,
-    output_path: str | Path,
+    growth_results: pd.DataFrame,
 ) -> None:
     """
     Plot Gaussian curves for the percolations.
@@ -26,7 +28,9 @@ def plot_gaussian_curves(
     fig, ax = plt.subplots(1, 2, figsize=(18, 6))
 
     # Surface coverage / area fraction
-    percentages = all_percolations['Area (%)'].astype(float).to_list()
+    percentages = growth_results[
+        'percolation_final_coverage_pct'
+    ].astype(float).to_list()
     mean_pct, std_pct = norm.fit(percentages)
     x_pct = np.linspace(0, 100, 500)
     p_pct = norm.pdf(x_pct, mean_pct, std_pct)
@@ -61,7 +65,7 @@ def plot_gaussian_curves(
     )
 
     # Time
-    times = all_percolations['Time (min)'].astype(float).to_list()
+    times = growth_results['percolation_time_min'].astype(float).to_list()
     mean_time, std_time = norm.fit(times)
     x_time = np.linspace(0, 10, 500)
     p_time = norm.pdf(x_time, mean_time, std_time)
@@ -95,7 +99,16 @@ def plot_gaussian_curves(
         va='top',
     )
 
-    plt.savefig(output_path)
+    save_fig_as_png(
+        plt.gcf(),
+        OUTPUT_DIR / 'images' / 'gaussian_curve.png',
+        dpi=300,
+    )
+    save_fig_as_pdf(
+        plt.gcf(),
+        OUTPUT_DIR / 'pdfs' / 'gaussian_curve.pdf',
+        dpi=300,
+    )
     plt.close()
 
 
@@ -112,9 +125,8 @@ def run_pipeline(
     if csv_path is None:
         csv_path = Path(cfg.percolations_csv_name)
 
-    all_percolations = pd.read_csv(csv_path, index_col=0)
-    output_path = Path(cfg.output_figure_name)
-    plot_gaussian_curves(all_percolations, output_path)
+    growth_results = pd.read_csv(csv_path, index_col=0)
+    plot_gaussian_curves(growth_results)
 
 
 # -------------------------------------------------

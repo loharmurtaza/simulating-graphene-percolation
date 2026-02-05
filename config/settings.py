@@ -78,12 +78,13 @@ class SimulationsConfig:
     simulations_to_run: int = field(
         default_factory=lambda: get_int('SIMULATIONS_TO_RUN'),
     )
+    max_workers: int = field(
+        default_factory=lambda: get_int('MAX_WORKERS')
+    )
+
 
 @dataclass
 class FinalResultsConfig:
     percolations_csv_name: str = field(
         default_factory=lambda: get_str('PERCOLATIONS_CSV_NAME'),
-    )
-    output_figure_name: str = field(
-        default_factory=lambda: get_str('OUTPUT_FIGURE_NAME'),
     )

@@ -4,6 +4,11 @@ from __future__ import annotations
 
 import logging
 import argparse
+from dotenv import load_dotenv
+
+# Load variables from env file
+load_dotenv()
+
 from utils.config_logger import setup_logging
 from scripts.run_surface import run_pipeline as run_surface
 from scripts.run_results import run_pipeline as run_results
@@ -29,7 +34,7 @@ def cli() -> None:
         "--task",
         choices=["surface", "n_simulations", "results"],
         required=True,
-    )
+    )git 
     args = p.parse_args()
 
     if args.task == "surface":

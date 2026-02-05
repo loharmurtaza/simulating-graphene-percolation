@@ -10,6 +10,9 @@ __pycache__/
 # Ignore venv
 venv/
 
+# Ignore notebooks directory
+notebooks/*
+
 # Ignore data/output
 data/output/*
 
