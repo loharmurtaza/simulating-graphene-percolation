@@ -158,8 +158,8 @@ Where:
 
 ## Output
 
-- **Percolation data**: `data/output/growth_results_simulations.csv`
-- **Statistical analysis figure**: `data/output/gaussian_curves.png`
+- **Percolation data**: `data/output/csvs/growth_results_simulations.csv`
+- **Statistical analysis figure**: `data/output/images/gaussian_curves.png`
 - **Simulation visualizations**: Displayed during runtime (if `SHOW_PLOTS=True`)
 
 ## License
