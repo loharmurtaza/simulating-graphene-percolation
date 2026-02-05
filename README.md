@@ -47,7 +47,7 @@ pip install -r requirements.txt
 Run the complete surface coverage and percolation analysis pipeline:
 
 ```bash
-python main_graphene_percolation.py --task surface
+python -m main_graphene_percolation --task surface
 ```
 
 This will:
@@ -62,7 +62,7 @@ This will:
 Run a configurable number of independent simulations with early-stopping at first percolation:
 
 ```bash
-python main_graphene_percolation.py --task n_simulations
+python -m main_graphene_percolation --task n_simulations
 ```
 
 Each run uses a different random seed. The pipeline stops each simulation at the first time-step where percolation occurs and records per-run results (percolation time, coverage, top-to-bottom/left-to-right). Set `SIMULATIONS_TO_RUN` in `.env` to control how many runs to execute.
@@ -72,10 +72,10 @@ Each run uses a different random seed. The pipeline stops each simulation at the
 Analyze percolation results and generate statistical plots:
 
 ```bash
-python main_graphene_percolation.py --task results
+python -m main_graphene_percolation --task results
 ```
 
-This generates Gaussian distribution fits for percolation time and area fraction.
+This generates Gaussian distribution fits for percolation time and area fraction for `N` simulations.
 
 ## Configuration
 
@@ -160,7 +160,7 @@ Where:
 
 - **Percolation data**: `data/output/csvs/growth_results_simulations.csv`
 - **Statistical analysis figure**: `data/output/images/gaussian_curves.png`
-- **Simulation visualizations**: Displayed during runtime (if `SHOW_PLOTS=True`)
+- **Simulation visualizations**: Displayed during runtime (if `SHOW_PLOTS=True`) for scripts/run_surface.py
 
 ## License
 
