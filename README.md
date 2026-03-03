@@ -2,6 +2,17 @@
 
 A scientific simulation tool for modeling the growth and percolation of graphene on a substrate surface. The project fits experimental surface coverage data to **logistic** or **exponential** growth models, simulates radial flake growth, and detects percolation using graph-based connectivity analysis.
 
+**This simulation accompanies the following paper:**
+
+> **Graphene Autocatalytic Growth with Percolation Control on a Dielectric Substrate**  
+> *Results in Engineering*, available online 28 February 2026, 109831 (In Press, Journal Pre-proof)  
+> DOI: [10.1016/j.rineng.2026.109831](https://doi.org/10.1016/j.rineng.2026.109831)  
+> © Open access under a Creative Commons license.
+
+**Authors:** Mohammadreza Salehpoor, Natalia S. Khoteeva, Artem K. Grebenko, Elena S. Zhukova, Kirill E. Malgin, Ghulam Murtaza, Nikita E. Gordeev, Nikita I. Raginov, Oleg R. Trepalin, Boris P. Gorshunov, Dmitry V. Krasnikov, Albert G. Nasibulin.
+
+**Author contributions:** Mohammadreza Salehpoor: Writing – review & editing, Writing – original draft, Visualization, Validation, Software, Methodology, Investigation, Formal analysis, Data curation, Conceptualization. Natalia S. Khoteeva: Visualization, Software, Methodology, Formal analysis, Conceptualization. Artem K. Grebenko: Writing – review & editing, Supervision, Methodology, Conceptualization. Elena S. Zhukova: Writing – review & editing, Visualization, Formal analysis, Data curation, Conceptualization. Kirill E. Malgin: Visualization, Software. Ghulam Murtaza: Software, Data curation. Nikita E. Gordeev: Writing – review & editing, Software, Conceptualization. Nikita I. Raginov: Resources. Oleg R. Trepalin: Resources. Boris P. Gorshunov: Writing – review & editing, Supervision, Formal analysis, Data curation, Conceptualization. Dmitry V. Krasnikov: Writing – review & editing, Validation, Supervision, Resources, Methodology, Conceptualization. Albert G. Nasibulin: Supervision.
+
 ## Overview
 
 The simulation addresses: **at what coverage and time does graphene form a percolated (connected) network on the surface?**
@@ -21,8 +32,8 @@ cd simulating-graphene-percolation
 # Create and activate a virtual environment
 python -m venv venv
 # Windows (PowerShell):
-
 .\venv\Scripts\Activate.ps1
+
 # Linux/macOS:
 source venv/bin/activate
 
