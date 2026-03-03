@@ -4,15 +4,26 @@ from __future__ import annotations
 
 import logging
 import argparse
-from dotenv import load_dotenv
-
-# Load variables from env file
-load_dotenv()
-
 from utils.config_logger import setup_logging
-from scripts.run_surface import run_pipeline as run_surface
-from scripts.run_results import run_pipeline as run_results
-from scripts.run_simulations import run_pipeline as run_simulations
+from load_env_variables import load_dotenv_variables
+from scripts.run_surface_logistic import (
+    run_pipeline_logistic as run_surface_logistic
+)
+from scripts.run_surface_exponential import (
+    run_pipeline_exponential as run_surface_exponential
+)
+from scripts.run_results_logistic import (
+    run_pipeline_logistic as run_results_logistic
+)
+from scripts.run_results_exponential import (
+    run_pipeline_exponential as run_results_exponential
+)
+from scripts.run_simulations_logistic import (
+    run_pipeline_logistic as run_simulations_logistic
+)
+from scripts.run_simulations_exponential import (
+    run_pipeline_exponential as run_simulations_exponential
+)
 from config.settings import (
     SurfaceCoverageConfig,
     SimulationsConfig,
@@ -31,6 +42,11 @@ def cli() -> None:
 
     p = argparse.ArgumentParser(description='Graphene Percolation Model')
     p.add_argument(
+        "--model",
+        choices=["logistic", "exponential"],
+        required=True,
+    )
+    p.add_argument(
         "--task",
         choices=["surface", "n_simulations", "results"],
         required=True,
@@ -39,14 +55,23 @@ def cli() -> None:
 
     if args.task == "surface":
         cfg = SurfaceCoverageConfig()
-        run_surface(cfg)
+        if args.model == "logistic":
+            run_surface_logistic(cfg)
+        elif args.model == "exponential":
+            run_surface_exponential(cfg)
     elif args.task == "n_simulations":
         cfg = SurfaceCoverageConfig()
         sim_cfg = SimulationsConfig()
-        run_simulations(cfg, sim_cfg)
+        if args.model == "logistic":
+            run_simulations_logistic(cfg, sim_cfg)
+        elif args.model == "exponential":
+            run_simulations_exponential(cfg, sim_cfg)
     else:
         cfg = FinalResultsConfig()
-        run_results(cfg)
+        if args.model == "logistic":
+            run_results_logistic(cfg)
+        elif args.model == "exponential":
+            run_results_exponential(cfg)
 
 
 # -------------------------------------------------

@@ -4,6 +4,9 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass, field
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 # -------------------------------------------------
@@ -85,6 +88,6 @@ class SimulationsConfig:
 
 @dataclass
 class FinalResultsConfig:
-    percolations_csv_name: str = field(
-        default_factory=lambda: get_str('PERCOLATIONS_CSV_NAME'),
+    percolations_csv_dir: str = field(
+        default_factory=lambda: get_str('PERCOLATIONS_CSV_DIR'),
     )
