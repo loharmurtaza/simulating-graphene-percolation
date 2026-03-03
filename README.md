@@ -224,4 +224,17 @@ $$
 
 ## License
 
-This project is for research and educational use.
+**This repository** (the simulation code and related materials in this repo) is released under the **Creative Commons Attribution 4.0 International (CC BY 4.0)** license.
+
+The **paper** (“Graphene Autocatalytic Growth with Percolation Control on a Dielectric Substrate”) is published open access in *Results in Engineering*; its license is determined by the publisher (see the article page and DOI above).
+
+For this repo, you are free to:
+
+- **Share** — copy and redistribute the material in any medium or format  
+- **Adapt** — remix, transform, and build upon the material for any purpose, including commercially  
+
+Under the following terms:
+
+- **Attribution** — you must give appropriate credit, provide a link to the license, and indicate if changes were made.
+
+Full license text: [https://creativecommons.org/licenses/by/4.0/](https://creativecommons.org/licenses/by/4.0/)
