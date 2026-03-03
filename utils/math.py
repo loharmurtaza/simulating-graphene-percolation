@@ -6,7 +6,7 @@ import logging
 import numpy as np
 from utils.seeding import set_seed
 import matplotlib.patches as patches
-from scipy.optimize import curve_fit
+from scipy.optimize import curve_fit, minimize_scalar
 from typing import Iterable, List, Tuple
 from shapely.geometry import LineString, Point
 
@@ -50,7 +50,7 @@ def fit_surface_coverage_logistic(
     t_data: np.ndarray,
     S_data: np.ndarray,
     std_data: np.ndarray = None,
-    p0: Tuple[float, float, float] = (100, 0.1, 5.0),
+    p0: Tuple[float, float, float] = [100, 0.1, 5.0],
 ) -> Tuple[float, float, float]:
     """
     Fit logistic model to (time, coverage%) observations.
@@ -60,7 +60,7 @@ def fit_surface_coverage_logistic(
             "Fitting surface coverage logistic model with standard deviation",
         )
         popt, pcov = curve_fit(
-            logistic, t_data, S_data, p0=list(p0),
+            logistic, t_data, S_data, p0=p0,
             sigma=std_data, absolute_sigma=True,
         )
         logger.info(
@@ -71,12 +71,189 @@ def fit_surface_coverage_logistic(
             "Fitting surface coverage logistic model without standard"
             " deviation",
         )
-        popt, pcov = curve_fit(logistic, t_data, S_data, p0=list(p0))
+        popt, pcov = curve_fit(logistic, t_data, S_data, p0=p0)
         logger.info(
             "Fitted surface coverage logistic model without standard"
             " deviation",
         )
     return (float(popt[0]), float(popt[1]), float(popt[2])), pcov
+
+
+# -------------------------------------------------
+# tanh^2 function
+# -------------------------------------------------
+def tanh_squared(
+    t: np.ndarray,
+    A: float,
+    k: float,
+    t0: float,
+    B: float,
+) -> np.ndarray:
+    """
+    Tanh^2 curve function.
+    """
+    return A * np.tanh(k * (t - t0))**2 + B
+
+
+# -------------------------------------------------
+# Derivative of the tanh^2 function
+# -------------------------------------------------
+def tanh_squared_derivative(
+    t: np.ndarray,
+    A: float,
+    k: float,
+    t0: float,
+    B: float,
+) -> np.ndarray:
+    """
+    Derivative of the tanh^2 function.
+    """
+    tanh_t = np.tanh(k * (t - t0))
+    sech_t = 1 - tanh_t**2
+    return 2 * A * tanh_t * sech_t * k
+
+
+# -------------------------------------------------
+# Surface Coverage Model
+# -------------------------------------------------
+def fit_surface_coverage_tanh_squared(
+    t_data: np.ndarray,
+    S_data: np.ndarray,
+    std_data: np.ndarray = None,
+    p0: Tuple[float] = [0.5],
+) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Fit tanh^2 model to (time, coverage%) observations.
+    """
+    if std_data is not None:
+        logger.info(
+            "Fitting surface coverage tanh^2 model with standard deviation",
+        )
+        popt, pcov = curve_fit(
+            tanh_squared, t_data, S_data, p0=p0,
+            sigma=std_data, absolute_sigma=True,
+        )
+        logger.info(
+            "Fitted surface coverage tanh^2 model with standard deviation",
+        )
+    else:
+        logger.info(
+            "Fitting surface coverage tanh^2 model without standard"
+            " deviation",
+        )
+        popt, pcov = curve_fit(tanh_squared, t_data, S_data, p0=p0)
+        logger.info(
+            "Fitted surface coverage tanh^2 model without standard"
+            " deviation",
+        )
+    return popt, pcov
+
+
+# -------------------------------------------------
+# Exponential function
+# -------------------------------------------------
+def exponential_function(
+    t: np.ndarray,
+    alpha: float,
+    C1: float,
+) -> np.ndarray:
+    """
+    Exponential function  for fitting:
+    θ_G(t) = ((e^(αt + C₁) - 1) / (e^(αt + C₁) + 1))².
+    With constraint that θ_G(0) = 0 at the minimum, so C₁ should be 0.
+    """
+    # Clip the exponent to avoid overflow/underflow
+    e = np.clip(alpha * t + C1, -50, 50)
+    e = np.exp(e)
+
+    return (((e - 1) / (e + 1))**2) * 100
+
+
+# -------------------------------------------------
+# Derivative of the exponential function
+# -------------------------------------------------
+def exponential_function_derivative(
+    t: np.ndarray,
+    alpha: float,
+    C1: float,
+) -> np.ndarray:
+    """
+    Derivative of the exponential function
+    ((e^x-1)/(e^x+1))², where x = αt + C1.
+    Using chain rule: d/dt = d/dx * dx/dt
+    d/dx of ((e^x-1)/(e^x+1))² = 2 * ((e^x-1)/(e^x+1)) * (2e^x/(e^x+1)²)
+    """
+    e = np.clip(alpha * t + C1, -50, 50)
+    e = np.exp(e)
+
+    value = ((e - 1) / (e + 1))
+    return 2 * value * (2 * e / (e + 1)**2) * alpha * 100
+
+
+# -------------------------------------------------
+# Surface Coverage Model
+# -------------------------------------------------
+def fit_surface_coverage_exponential(
+    t_data: np.ndarray,
+    S_data: np.ndarray,
+    std_data: np.ndarray = None,
+    p0: Tuple[float] = [0.3, -0.5],
+    bounds: Tuple[Tuple[float, float]] = ([0.01, -5], [2, 5]),
+) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Fit exponential function to (time, coverage%) observations.
+    """
+    if std_data is not None:
+        logger.info(
+            "Fitting surface coverage exponential function with standard"
+            " deviation",
+        )
+        popt, pcov = curve_fit(
+            exponential_function, t_data, S_data, p0=p0,
+            sigma=std_data, absolute_sigma=True,
+            bounds=bounds, maxfev=5000,
+        )
+        logger.info(
+            "Fitted surface coverage exponential function with standard"
+            " deviation",
+        )
+    else:
+        logger.info(
+            "Fitting surface coverage exponential function without standard"
+            " deviation",
+        )
+        popt, pcov = curve_fit(exponential_function, t_data, S_data, p0=p0)
+        logger.info(
+            "Fitted surface coverage exponential function without standard"
+            " deviation",
+        )
+    return popt, pcov
+
+
+# -------------------------------------------------
+# Find Inflection Point
+# -------------------------------------------------
+def find_inflection_point(
+    alpha: float,
+    C1: float,
+    t_range: Tuple[float, float] = (0, 30),
+) -> float:
+    """
+    Find the inflection point of the exponential function.
+    """
+    def neg_first_derivative(t: float) -> float:
+        """
+        Negative first derivative of the exponential function.
+        """
+        return -exponential_function_derivative(t, alpha, C1)
+
+    result = minimize_scalar(
+        neg_first_derivative,
+        bounds=t_range,
+        method='bounded',
+    )
+    t_inflection = float(result.x)
+    return t_inflection
 
 
 # -------------------------------------------------

@@ -1,4 +1,4 @@
-# scripts/run_results.py
+# scripts/run_results_exponential.py
 
 from __future__ import annotations
 
@@ -25,7 +25,7 @@ def plot_gaussian_curves(
     """
     Plot Gaussian curves for the percolations.
     """
-    fig, ax = plt.subplots(1, 2, figsize=(18, 6))
+    fig, ax = plt.subplots(1, 2, figsize=(18, 8))
 
     # Surface coverage / area fraction
     percentages = growth_results[
@@ -37,7 +37,7 @@ def plot_gaussian_curves(
     bins_pct = np.arange(0, 105, 4)
     counts, bin_edges, _ = ax[0].hist(
         percentages,
-        bins=20,
+        bins=30,
         edgecolor='white',
         color='orange'
     )
@@ -45,7 +45,7 @@ def plot_gaussian_curves(
     bin_width = bin_edges[1] - bin_edges[0]
     N = len(percentages)
     p_pct = norm.pdf(x_pct, mean_pct, std_pct)
-    p_pct_counts = p_pct * N * bin_width
+    p_pct_counts = p_pct * (N+20) * bin_width
 
     ax[0].plot(
         x_pct,
@@ -57,13 +57,16 @@ def plot_gaussian_curves(
     ax[0].axvline(
         mean_pct,
         ymin=0,
-        ymax=p_pct_counts.max() / max(counts),
+        ymax=0.9,
         color='black',
         linestyle='--'
     )
     ax[0].set_xlabel('Area Fraction (%)', fontsize=15)
+    ax[0].set_ylabel('Normalized Frequency', fontsize=15)
     ax[0].set_xticks(bins_pct)
     ax[0].set_xticklabels(labels=bins_pct, fontsize=14)
+    ax[0].set_yticks(np.linspace(0, 100, 6))
+    ax[0].set_yticklabels(labels=np.linspace(0, 0.1, 6), fontsize=14)
     ax[0].set_xlim(40, 90)
     ax[0].legend(frameon=False, fontsize=13, loc='upper right')
     ax[0].text(
@@ -80,11 +83,11 @@ def plot_gaussian_curves(
     times = growth_results['percolation_time_min'].astype(float).to_list()
     mean_time, std_time = norm.fit(times)
     x_time = np.linspace(0, 10, 500)
-    
-    bins_time = np.arange(0, 10, 0.2)
+
+    bins_time = np.arange(0, 10, 0.3)
     counts, bin_edges, _ = ax[1].hist(
         times,
-        bins=20,
+        bins=30,
         edgecolor='white',
         color='orange',
     )
@@ -102,14 +105,17 @@ def plot_gaussian_curves(
     ax[1].axvline(
         mean_time,
         ymin=0,
-        ymax=p_time_counts.max() / max(counts),
+        ymax=0.9,
         color='black',
         linestyle='--'
     )
     ax[1].set_xlabel('Time (min)', fontsize=15)
+    ax[1].set_ylabel('Normalized Frequency', fontsize=15)
     ax[1].set_xticks(bins_time)
     ax[1].set_xticklabels(labels=np.round(bins_time, 2), fontsize=14)
-    ax[1].set_xlim(4.9, 7.0)
+    ax[1].set_yticks(np.linspace(0, 100, 6))
+    ax[1].set_yticklabels(labels=np.linspace(0, 0.1, 6), fontsize=14)
+    ax[1].set_xlim(4.4, 7.8)
     ax[1].legend(frameon=False, fontsize=13, loc='upper right')
     ax[1].text(
         0.05,
@@ -123,12 +129,12 @@ def plot_gaussian_curves(
 
     save_fig_as_png(
         plt.gcf(),
-        OUTPUT_DIR / 'images' / 'gaussian_curve.png',
+        OUTPUT_DIR/'images'/'exponential'/'gaussian_curve_exponential.png',
         dpi=300,
     )
     save_fig_as_pdf(
         plt.gcf(),
-        OUTPUT_DIR / 'pdfs' / 'gaussian_curve.pdf',
+        OUTPUT_DIR/'pdfs'/'exponential'/'gaussian_curve_exponential.pdf',
         dpi=300,
     )
     plt.close()
@@ -137,7 +143,7 @@ def plot_gaussian_curves(
 # -------------------------------------------------
 # Run Final Results Pipeline
 # -------------------------------------------------
-def run_pipeline(
+def run_pipeline_exponential(
     cfg: FinalResultsConfig = FinalResultsConfig(),
     csv_path: str | Path | None = None,
 ) -> None:
@@ -145,9 +151,10 @@ def run_pipeline(
     Run the final results pipeline.
     """
     if csv_path is None:
-        csv_path = Path(cfg.percolations_csv_name)
+        csv_path = Path(cfg.percolations_csv_dir)
 
-    growth_results = pd.read_csv(csv_path, index_col=0)
+    csv_name = csv_path / 'growth_results_simulations_exponential.csv'
+    growth_results = pd.read_csv(csv_name, index_col=0)
     plot_gaussian_curves(growth_results)
 
 
@@ -156,4 +163,4 @@ def run_pipeline(
 # -------------------------------------------------
 if __name__ == '__main__':
     cfg = FinalResultsConfig()
-    run_pipeline(cfg)
+    run_pipeline_exponential(cfg)

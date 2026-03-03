@@ -1,4 +1,4 @@
-# scripts/run_simulations.py
+# scripts/run_simulations_logistic.py
 
 from __future__ import annotations
 
@@ -20,8 +20,8 @@ from config.settings import (
     SurfaceCoverageConfig, SimulationsConfig, OUTPUT_DIR
 )
 from utils.math import (
-    fit_surface_coverage_logistic,
-    logistic,
+    fit_surface_coverage_exponential,
+    exponential_function,
     random_points,
     build_initial_circles,
 )
@@ -206,7 +206,7 @@ def _run_single_simulation(args: tuple) -> dict:
 # -------------------------------------------------
 # Run N simulations and write a single CSV
 # -------------------------------------------------
-def run_pipeline(
+def run_pipeline_exponential(
     cfg: SurfaceCoverageConfig = SurfaceCoverageConfig(),
     sim_cfg: SimulationsConfig = SimulationsConfig()
 ) -> None:
@@ -219,16 +219,20 @@ def run_pipeline(
     # Fit Logistic once (shared)
     t_data, S_data, std_data = load_experimental_raw_data(cfg.raw_data_path)
     if cfg.use_std:
-        (L, k, t0), pcov = fit_surface_coverage_logistic(
+        params, pcov = fit_surface_coverage_exponential(
             t_data, S_data, std_data,
         )
     else:
-        (L, k, t0), pcov = fit_surface_coverage_logistic(
+        params, pcov = fit_surface_coverage_exponential(
             t_data, S_data,
         )
 
-    t_fit = np.arange(0, 27.1, 0.1)
-    S_fit = logistic(t_fit, L, k, t0)
+    alpha, C1 = params[0], params[1]
+    t_min = -C1/alpha if alpha != 0 else 0
+
+    # t_fit = np.linspace(t_min, 30, 400)
+    t_fit = np.arange(t_min, 27.1, 0.1)
+    S_fit = exponential_function(t_fit, alpha, C1)
 
     # ensure each simulation gets a different seed
     rng = np.random.default_rng()
@@ -267,7 +271,7 @@ def run_pipeline(
         )
 
     df = pd.DataFrame(records)
-    out_path = out_csv_dir / "growth_results_simulations.csv"
+    out_path = out_csv_dir / "growth_results_simulations_exponential.csv"
     df.to_csv(out_path, index=False)
 
     logger.info(f"Wrote {len(df)} rows -> {out_path}")
@@ -279,4 +283,4 @@ def run_pipeline(
 if __name__ == "__main__":
     cfg = SurfaceCoverageConfig()
     sim_cfg = SimulationsConfig()
-    run_pipeline()
+    run_pipeline_exponential(cfg, sim_cfg)

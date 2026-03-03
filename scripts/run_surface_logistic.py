@@ -1,4 +1,4 @@
-# scripts/run_surface.py
+# scripts/run_surface_logistic.py
 
 from __future__ import annotations
 
@@ -132,12 +132,12 @@ def simulate_growth(
 
             save_fig_as_png(
                 plt.gcf(),
-                OUTPUT_DIR / 'images' / f'time_index_{time:.1f}min.png',
+                OUTPUT_DIR/'images'/'logistic'/f'time_index_{time:.1f}min.png',
                 dpi=300,
             )
             save_fig_as_pdf(
                 plt.gcf(),
-                OUTPUT_DIR / 'pdfs' / f'time_index_{time:.1f}min.pdf',
+                OUTPUT_DIR/'pdfs'/'logistic'/f'time_index_{time:.1f}min.pdf',
                 dpi=300,
             )
             plt.close()
@@ -178,7 +178,7 @@ def simulate_growth(
 # -------------------------------------------------
 # Run Surface Coverage Pipeline
 # -------------------------------------------------
-def run_pipeline(
+def run_pipeline_logistic(
     cfg: SurfaceCoverageConfig = SurfaceCoverageConfig()
 ) -> None:
     """
@@ -239,12 +239,12 @@ def run_pipeline(
 
         save_fig_as_png(
             plt.gcf(),
-            OUTPUT_DIR / 'images' / 'surface_coverage_vs_time.png',
+            OUTPUT_DIR/'images'/'logistic'/'surface_coverage_vs_time_logistic.png',
             dpi=300,
         )
         save_fig_as_pdf(
             plt.gcf(),
-            OUTPUT_DIR / 'pdfs' / 'surface_coverage_vs_time.pdf',
+            OUTPUT_DIR/'pdfs'/'logistic'/'surface_coverage_vs_time_logistic.pdf',
             dpi=300,
         )
         plt.close()
@@ -276,7 +276,7 @@ def run_pipeline(
 
     save_growth_results_summary(
         results,
-        OUTPUT_DIR / 'csvs' / 'growth_results_single_percolation.csv',
+        OUTPUT_DIR/'csvs'/'growth_results_single_percolation_logistic.csv',
     )
 
 
@@ -285,4 +285,4 @@ def run_pipeline(
 # -------------------------------------------------
 if __name__ == '__main__':
     cfg = SurfaceCoverageConfig()
-    run_pipeline(cfg)
+    run_pipeline_logistic(cfg)
