@@ -15,21 +15,20 @@ The simulation addresses: **at what coverage and time does graphene form a perco
 
 ```bash
 # Clone the repository
-git clone <repository-url>
-cd graphene-percolation-reza
+git clone https://github.com/loharmurtaza/simulating-graphene-percolation.git
+cd simulating-graphene-percolation
 
 # Create and activate a virtual environment
 python -m venv venv
 # Windows (PowerShell):
+
 .\venv\Scripts\Activate.ps1
 # Linux/macOS:
-# source venv/bin/activate
+source venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
 ```
-
-Copy `.env.example` to `.env` (if present) and set `PROJECT_ROOT` and paths as needed. The default `.env` uses `PROJECT_ROOT=./` and paths under `./data`.
 
 ### Dependencies
 
@@ -128,40 +127,45 @@ Configuration is via the `.env` file in the project root.
 
 ```
 graphene-percolation-reza/
-├── main_graphene_percolation.py   # CLI entry point (--model, --task)
-├── load_env_variables.py         # Load .env
-├── requirements.txt
-├── .env                           # Configuration (paths, flags, seeds)
+├── main_graphene_percolation.py            # CLI entry point (--model, --task)
+├── load_env_variables.py                   # Load .env
+├── requirements.txt                        # Required libraries and their versions
+├── .env                                    # Configuration (paths, flags, seeds)
 ├── config/
-│   └── settings.py                # Dataclasses: SurfaceCoverageConfig, etc.
+│   ├── __init__.py
+│   └── settings.py                         # Dataclasses: SurfaceCoverageConfig, etc.
 ├── models/
-│   ├── growth_result.py           # Single-run growth/percolation result
-│   └── simulation_result.py       # Per-simulation result (n_simulations)
+│   ├── growth_result.py                    # Single-run growth/percolation result
+│   └── simulation_result.py                # Per-simulation result (n_simulations)
 ├── scripts/
-│   ├── run_surface_logistic.py    # Surface pipeline (logistic)
-│   ├── run_surface_exponential.py # Surface pipeline (exponential)
-│   ├── run_simulations_logistic.py
-│   ├── run_simulations_exponential.py
-│   ├── run_results_logistic.py
-│   ├── run_results_exponential.py
-│   └── test_scripts/              # Standalone fit/plot scripts
-│       ├── test_exponential_function.py
-│       └── test_tanh_squared.py
+│   ├── __init__.py
+│   ├── run_surface_logistic.py             # Surface pipeline (logistic)
+│   ├── run_surface_exponential.py          # Surface pipeline (exponential)
+│   ├── run_simulations_logistic.py         # Simulations pipeline (logistic)
+│   ├── run_simulations_exponential.py      # Simulations pipeline (exponential)
+│   ├── run_results_logistic.py             # Results analysis pipeline (logistic)
+│   ├── run_results_exponential.py          # Results analysis pipeline (exponential)
+│   └── test_scripts/                       # Standalone fit/plot scripts
+│       ├── test_exponential_function.py    # Test script for exponential fitting function
+│       └── test_tanh_squared.py            # Test script for logistic fitting function
 ├── utils/
-│   ├── config_logger.py           # Logging setup
-│   ├── io.py                      # Data I/O
-│   ├── math.py                    # Growth models, fitting, geometry
-│   ├── save_files.py              # Figure export
-│   ├── search_algorithm.py        # BFS percolation
-│   ├── seeding.py                 # Random seed handling
-│   └── visualization.py           # Graph generation
-└── data/
-    ├── raw/
-    │   └── experimental_raw.csv  # time (min), coverage (%), std (%)
-    └── output/
-        ├── csvs/                  # Growth and percolation CSVs
-        ├── images/                # PNGs (logistic/, exponential/)
-        └── pdfs/                  # PDFs (logistic/, exponential/)
+│   ├── __init__.py
+│   ├── config_logger.py                    # Logging setup
+│   ├── io.py                               # Data I/O
+│   ├── math.py                             # Growth models, fitting, geometry
+│   ├── save_files.py                       # Figure export
+│   ├── search_algorithm.py                 # BFS percolation
+│   ├── seeding.py                          # Random seed handling
+│   └── visualization.py                    # Graph generation
+├── data/
+│   ├── raw/
+│   │   ├── experimental_raw.csv            # time (min), coverage (%), std (%)
+│   │   └── original_experimental_data.txt
+│   └── output/                             # Created at runtime (gitignored)
+│       ├── csvs/                           # Growth and percolation CSVs
+│       ├── images/                         # PNGs (logistic/, exponential/)
+│       └── pdfs/                           # PDFs (logistic/, exponential/)
+└── logs/                                   # Run logs (gitignored)
 ```
 
 ## Input data format
@@ -170,7 +174,6 @@ graphene-percolation-reza/
 
 ```csv
 data_point (min),surface_coverage (%),standard_deviation (%)
-0,0,0
 2,3,0.73819
 5.5,51,2.9242
 ...
@@ -207,10 +210,6 @@ $$
 - **Single-run surface**: `data/output/csvs/growth_results_single_percolation_<logistic|exponential>.csv`; figures under `data/output/images/` and `data/output/pdfs/` (logistic/ or exponential/).
 - **N-simulations**: percolation CSVs in `data/output/csvs/` (and path given by `PERCOLATIONS_CSV_DIR`).
 - **Results task**: Gaussian-curve figures, e.g. `data/output/images/gaussian_curve_<logistic|exponential>.png` and corresponding PDFs.
-
-## Debugging
-
-Use the **Python: Scripts (debug)** configuration in `.vscode/launch.json` to run scripts under `scripts/` with the project root on `PYTHONPATH` and correct working directory.
 
 ## License
 
