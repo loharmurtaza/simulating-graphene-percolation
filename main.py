@@ -1,11 +1,10 @@
-# main_graphene_percolation.py
+# main.py
 
 from __future__ import annotations
 
 import logging
 import argparse
 from utils.config_logger import setup_logging
-from load_env_variables import load_dotenv_variables
 from scripts.run_surface_logistic import (
     run_pipeline_logistic as run_surface_logistic
 )

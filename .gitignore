@@ -24,3 +24,6 @@ logs/*
 
 # Ignore COMMIT_MESSAGE.txt
 COMMIT_MESSAGE.txt
+
+# Ignore local environment config (copy .env.example to .env)
+.env
